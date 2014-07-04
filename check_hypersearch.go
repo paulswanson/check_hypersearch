@@ -17,7 +17,6 @@ const (
 )
 
 var exitCode int
-var requireAll, quiet, verbose bool
 
 func main() {
 
@@ -50,6 +49,7 @@ GLOBAL OPTIONS:
 
 	app.Action = func(c *cli.Context) {
 
+		var requireAll, quiet, verbose bool
 		var found int
 
 		if c.String("require") == "some" {
