@@ -87,6 +87,7 @@ GLOBAL OPTIONS:
 		if err != nil {
 			println("Couldn't read that page!")
 			exitCode = NAGIOS_UNKNOWN
+			return
 		}
 
 		var found int
