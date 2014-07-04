@@ -27,7 +27,6 @@ func main() {
 	app.Usage = "Search for text on a web page"
 	app.Flags = []cli.Flag{
 		cli.StringFlag{"require,r", "all", "Require 'all' or 'some'"},
-		cli.BoolFlag{"quiet, q", "Be quiet"},
 		cli.BoolFlag{"verbose", "Be verbose; for debugging etc."},
 	}
 
@@ -49,16 +48,12 @@ GLOBAL OPTIONS:
 
 	app.Action = func(c *cli.Context) {
 
-		var requireAll, quiet, verbose bool
+		var requireAll, verbose bool
 
 		if c.String("require") == "some" {
 			requireAll = false
 		} else {
 			requireAll = true
-		}
-
-		if c.Bool("quiet") {
-			quiet = true
 		}
 
 		if c.Bool("verbose") {
@@ -124,9 +119,8 @@ GLOBAL OPTIONS:
 			exitCode = NAGIOS_WARNING
 		}
 
-		if !quiet {
-			fmt.Printf("Found %v of %v %v\n", found, queryCount, statusMessage)
-		}
+		fmt.Printf("Found %v of %v %v\n", found, queryCount, statusMessage)
+
 		if verbose {
 			println("Nagios exit code:", exitCode)
 		}
