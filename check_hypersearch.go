@@ -50,7 +50,6 @@ GLOBAL OPTIONS:
 	app.Action = func(c *cli.Context) {
 
 		var requireAll, quiet, verbose bool
-		var found int
 
 		if c.String("require") == "some" {
 			requireAll = false
@@ -95,6 +94,7 @@ GLOBAL OPTIONS:
 			exitCode = NAGIOS_UNKNOWN
 		}
 
+		var found int
 		queryCount := argCount - 1
 
 		for _, s := range args[1:] {
