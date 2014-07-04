@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"fmt"
 )
 
 const (
@@ -121,7 +122,7 @@ GLOBAL OPTIONS:
 				case NAGIOS_CRITICAL:
 					statusMessage = "FAIL."
 				}
-			println("Found", found, "of", queryCount, statusMessage)
+			fmt.Printf("Found %v of %v %v\n", found, queryCount, statusMessage)
 		}
 		if verbose {
 			println("Nagios exit code:", exitCode)
