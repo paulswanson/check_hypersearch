@@ -2,11 +2,11 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/codegangsta/cli"
 	"io/ioutil"
 	"net/http"
 	"os"
-	"fmt"
 )
 
 const (
@@ -17,7 +17,7 @@ const (
 )
 
 var exitCode int
-var mustContain, quiet, verbose bool
+var requireAll, quiet, verbose bool
 
 func main() {
 
@@ -53,9 +53,9 @@ GLOBAL OPTIONS:
 		var found int
 
 		if c.String("require") == "some" {
-			mustContain = false
+			requireAll = false
 		} else {
-			mustContain = true
+			requireAll = true
 		}
 
 		if c.Bool("quiet") {
@@ -110,18 +110,21 @@ GLOBAL OPTIONS:
 			}
 		}
 
-		exitCode = nagiosExitCode(queryCount, found)
 		var statusMessage string
 
+		switch {
+		case queryCount == found:
+			statusMessage = "OK."
+			exitCode = NAGIOS_OK
+		case found == 0 || requireAll:
+			statusMessage = "FAIL."
+			exitCode = NAGIOS_CRITICAL
+		default:
+			statusMessage = "Some OK."
+			exitCode = NAGIOS_WARNING
+		}
+
 		if !quiet {
-			switch exitCode {
-				case NAGIOS_OK:
-					statusMessage = "OK."
-				case NAGIOS_WARNING:
-					statusMessage = "Some OK."
-				case NAGIOS_CRITICAL:
-					statusMessage = "FAIL."
-				}
 			fmt.Printf("Found %v of %v %v\n", found, queryCount, statusMessage)
 		}
 		if verbose {
@@ -133,17 +136,4 @@ GLOBAL OPTIONS:
 	app.Run(os.Args)
 
 	os.Exit(exitCode)
-}
-
-func nagiosExitCode(queryCount, queriesFound int) int {
-	switch {
-	case queryCount == queriesFound:
-		return NAGIOS_OK
-	case queriesFound == 0:
-		return NAGIOS_CRITICAL
-	case mustContain:
-		return NAGIOS_CRITICAL
-	default:
-		return NAGIOS_WARNING
-	}
 }
