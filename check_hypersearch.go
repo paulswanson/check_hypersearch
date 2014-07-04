@@ -110,9 +110,18 @@ GLOBAL OPTIONS:
 		}
 
 		exitCode = nagiosExitCode(queryCount, found)
-		if !quiet {
+		var statusMessage string
 
-			println("Found", found, "of", queryCount)
+		if !quiet {
+			switch exitCode {
+				case NAGIOS_OK:
+					statusMessage = "OK."
+				case NAGIOS_WARNING:
+					statusMessage = "Some OK."
+				case NAGIOS_CRITICAL:
+					statusMessage = "FAIL."
+				}
+			println("Found", found, "of", queryCount, statusMessage)
 		}
 		if verbose {
 			println("Nagios exit code:", exitCode)
