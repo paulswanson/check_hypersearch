@@ -70,22 +70,22 @@ GLOBAL OPTIONS:
 		}
 
 		if verbose {
-			println("Accessing", args[0])
+			fmt.Printf("Accessing %v\n", args[0])
 		}
 		resp, err := http.Get(args[0])
 		if err != nil {
-			println("Couldn't access that link!")
+			fmt.Printf("Couldn't access that link!\n")
 			exitCode = NAGIOS_UNKNOWN
 			return
 		}
 		defer resp.Body.Close()
 
 		if verbose {
-			println("Reading page...")
+			fmt.Printf("Reading page...\n")
 		}
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			println("Couldn't read that page!")
+			fmt.Printf("Couldn't read that page!\n")
 			exitCode = NAGIOS_UNKNOWN
 			return
 		}
@@ -97,11 +97,11 @@ GLOBAL OPTIONS:
 			if bytes.Contains(body, []byte(s)) {
 				found++
 				if verbose {
-					println("Found:", s)
+					fmt.Printf("Found: %v\n", s)
 				}
 			} else {
 				if verbose {
-					println("Not found:", s)
+					fmt.Printf("Not found: %v\n", s)
 				}
 			}
 		}
@@ -123,7 +123,7 @@ GLOBAL OPTIONS:
 		fmt.Printf("Found %v of %v %v\n", found, queryCount, statusMessage)
 
 		if verbose {
-			println("Nagios exit code:", exitCode)
+			fmt.Printf("Nagios exit code: %v\n", exitCode)
 		}
 
 	}
