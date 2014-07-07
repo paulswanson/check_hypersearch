@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"html"
 )
 
 const (
@@ -108,11 +109,11 @@ GLOBAL OPTIONS:
 			if bytes.Contains(body, []byte(s)) {
 				found++
 				if logging {
-					log("Found: ", s)
+					log("Found: ",html.EscapeString(s),";")
 				}
 			} else {
 				if logging {
-					log("Not found: ", s)
+					log("Not found: ",html.EscapeString(s),";")
 				}
 			}
 		}
@@ -131,7 +132,7 @@ GLOBAL OPTIONS:
 			exitCode = NAGIOS_WARNING
 		}
 
-		fmt.Println("Found", found, "of", queryCount, statusMessage)
+		fmt.Println("Found", found, "of", queryCount, statusMessage, "| ")
 		if longOutput {
 			fmt.Print(longMsg)
 		}
@@ -149,7 +150,6 @@ GLOBAL OPTIONS:
 }
 
 func log(messages ...interface{}) {
-	fmt.Sprint("Crap\n")
 	msg := fmt.Sprint(messages...) + "\n"
 	if longOutput {
 		longMsg += msg
