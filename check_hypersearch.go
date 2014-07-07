@@ -16,6 +16,8 @@ const (
 	NAGIOS_UNKNOWN  int = 3
 )
 
+var longOutput bool
+var longMsg string
 var exitCode int
 
 func main() {
@@ -27,7 +29,8 @@ func main() {
 	app.Usage = "Search for text on a web page"
 	app.Flags = []cli.Flag{
 		cli.StringFlag{"require,r", "all", "Require 'all' or 'some'"},
-		cli.BoolFlag{"verbose", "Be verbose; for debugging etc."},
+		cli.BoolFlag{"long, l", "Show long output for Nagios"},
+		cli.BoolFlag{"debug", "Show debugging output"},
 	}
 
 	cli.AppHelpTemplate = `NAME:
@@ -48,17 +51,7 @@ GLOBAL OPTIONS:
 
 	app.Action = func(c *cli.Context) {
 
-		var requireAll, verbose bool
-
-		if c.String("require") == "some" {
-			requireAll = false
-		} else {
-			requireAll = true
-		}
-
-		if c.Bool("verbose") {
-			verbose = true
-		}
+		var requireAll, debug, logging bool
 
 		args := c.Args()
 		argCount := len(args)
@@ -69,23 +62,41 @@ GLOBAL OPTIONS:
 			return
 		}
 
-		if verbose {
-			fmt.Printf("Accessing %v\n", args[0])
+		if c.String("require") == "some" {
+			requireAll = false
+		} else {
+			requireAll = true
+		}
+
+		if c.Bool("debug") {
+			debug = true
+		}
+
+		if c.Bool("long") {
+			longOutput = true
+		}
+
+		if debug || longOutput {
+			logging = true
+		}
+
+		if debug {
+			log("Accessing ", args[0])
 		}
 		resp, err := http.Get(args[0])
 		if err != nil {
-			fmt.Printf("Couldn't access that link!\n")
+			log("Couldn't access that link!")
 			exitCode = NAGIOS_UNKNOWN
 			return
 		}
 		defer resp.Body.Close()
 
-		if verbose {
-			fmt.Printf("Reading page...\n")
+		if debug {
+			log("Reading page...")
 		}
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			fmt.Printf("Couldn't read that page!\n")
+			log("Couldn't read that page!")
 			exitCode = NAGIOS_UNKNOWN
 			return
 		}
@@ -96,12 +107,12 @@ GLOBAL OPTIONS:
 		for _, s := range args[1:] {
 			if bytes.Contains(body, []byte(s)) {
 				found++
-				if verbose {
-					fmt.Printf("Found: %v\n", s)
+				if logging {
+					log("Found: ", s)
 				}
 			} else {
-				if verbose {
-					fmt.Printf("Not found: %v\n", s)
+				if logging {
+					log("Not found: ", s)
 				}
 			}
 		}
@@ -120,15 +131,29 @@ GLOBAL OPTIONS:
 			exitCode = NAGIOS_WARNING
 		}
 
-		fmt.Printf("Found %v of %v %v\n", found, queryCount, statusMessage)
-
-		if verbose {
-			fmt.Printf("Nagios exit code: %v\n", exitCode)
+		fmt.Println("Found", found, "of", queryCount, statusMessage)
+		if longOutput {
+			fmt.Print(longMsg)
 		}
+
+		if debug {
+			log("Nagios exit code: ", exitCode)
+		}
+
 
 	}
 
 	app.Run(os.Args)
 
 	os.Exit(exitCode)
+}
+
+func log(messages ...interface{}) {
+	fmt.Sprint("Crap\n")
+	msg := fmt.Sprint(messages...) + "\n"
+	if longOutput {
+		longMsg += msg
+	} else {
+		fmt.Print(msg)
+	}
 }
