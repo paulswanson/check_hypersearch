@@ -150,7 +150,7 @@ GLOBAL OPTIONS:
 }
 
 func log(messages ...interface{}) {
-	msg := fmt.Sprint(messages...) + "\n"
+	msg := fmt.Sprintln(messages...)
 	if longOutput {
 		longMsg += msg
 	} else {
